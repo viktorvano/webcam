@@ -24,6 +24,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Main extends Application implements WebcamListener {
+    private static final String version = "v20230222";
     private Webcam webcam;
     private BufferedImage bufferedImage;
     private Image image;
@@ -137,7 +138,7 @@ public class Main extends Application implements WebcamListener {
         Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
-        primaryStage.setTitle("Webcam Viewer with effects");
+        primaryStage.setTitle("Webcam - " + version);
         primaryStage.show();
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
