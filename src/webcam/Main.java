@@ -128,7 +128,7 @@ public class Main extends Application implements WebcamListener {
         labelMotionCount.setFont(Font.font("Arial", 20));
 
         Pane pane = new Pane();
-        pane.setPrefSize(1540, 700);
+        pane.setPrefSize(1350, 700);
         pane.setStyle("-fx-background-color: #7F7F7F");
         pane.getChildren().add(imageView);
         pane.getChildren().add(imageView2);
