@@ -24,11 +24,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Main extends Application implements WebcamListener {
-    private static final String version = "v20230222";
+    private static final String version = "v20241214";
     private Webcam webcam;
-    private BufferedImage bufferedImage;
-    private Image image;
-    private ImageView imageView;
+    private BufferedImage bufferedImage, bufferedImageManVision;
+    private Image image, imageManVision;
+    private ImageView imageView, imageView2;
     private boolean showMotionEffect = false, addRGB = false, monochromatic = false;
     private float motion = 0f;
     private float threshold = 2.0f;
@@ -55,6 +55,11 @@ public class Main extends Application implements WebcamListener {
         imageView.setImage(image);
         imageView.setLayoutX(6);
         imageView.setLayoutY(6);
+
+        imageView2 = new ImageView();
+        imageView2.setImage(image);
+        imageView2.setLayoutX(700);
+        imageView2.setLayoutY(6);
 
         Label labelMotion = new Label();
         labelMotion.setLayoutX(10);
@@ -123,9 +128,10 @@ public class Main extends Application implements WebcamListener {
         labelMotionCount.setFont(Font.font("Arial", 20));
 
         Pane pane = new Pane();
-        pane.setPrefSize(640, 700);
+        pane.setPrefSize(1540, 700);
         pane.setStyle("-fx-background-color: #7F7F7F");
         pane.getChildren().add(imageView);
+        pane.getChildren().add(imageView2);
         pane.getChildren().add(labelMotion);
         pane.getChildren().add(checkBoxMonochromatic);
         pane.getChildren().add(checkBoxMotion);
@@ -202,11 +208,13 @@ public class Main extends Application implements WebcamListener {
             }
 
             if(addRGB)
-            for(int width = 0; width < bufferedImageResult.getWidth(); width++)
-                for(int height = 0; height < bufferedImageResult.getHeight(); height++) {
-                    color = bufferedImageResult.getRGB(width, height) + bufferedImageNew.getRGB(width, height);
-                    bufferedImageResult.setRGB(width, height, color);
-                }
+            {
+                for(int width = 0; width < bufferedImageResult.getWidth(); width++)
+                    for(int height = 0; height < bufferedImageResult.getHeight(); height++) {
+                        color = bufferedImageResult.getRGB(width, height) + bufferedImageNew.getRGB(width, height);
+                        bufferedImageResult.setRGB(width, height, color);
+                    }
+            }
             image = SwingFXUtils.toFXImage(bufferedImageResult, null);
             imageView.setImage(image);
             bufferedImage = bufferedImageMonoChromatic;
@@ -218,6 +226,12 @@ public class Main extends Application implements WebcamListener {
             image = SwingFXUtils.toFXImage(bufferedImage, null);
             imageView.setImage(image);
         }
+
+        //man vision
+        bufferedImageManVision = webcam.getImage();
+        applyManVision(bufferedImageManVision);
+        imageManVision = SwingFXUtils.toFXImage(bufferedImageManVision, null);
+        imageView2.setImage(imageManVision);
     }
 
     private void setMonochromatic(BufferedImage bufferedImageMono)
@@ -234,6 +248,24 @@ public class Main extends Application implements WebcamListener {
                 color = (red + green + blue) / 3;
                 color = color*65536 + color*256 + color;
                 bufferedImageMono.setRGB(width, height, color);
+            }
+    }
+
+    private void applyManVision(BufferedImage bufferedImageMan)
+    {
+        int color;
+        Color c;
+        float green_red_ratio = 0;
+        int red, green, blue;
+        for(int width = 0; width < bufferedImageMan.getWidth(); width++)
+            for(int height = 0; height < bufferedImageMan.getHeight(); height++) {
+                c = new Color(bufferedImageMan.getRGB(width, height));
+                red = c.getRed();
+                green = c.getGreen();
+                blue = c.getBlue();
+                green_red_ratio = ((((float) red - (float) green) / 255.0f) + 1.0f) / 2.0f;
+                color = (int)(green_red_ratio*(float)red)*65536 + green*256 + blue;
+                bufferedImageMan.setRGB(width, height, color);
             }
     }
 
