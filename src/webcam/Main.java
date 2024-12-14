@@ -128,7 +128,7 @@ public class Main extends Application implements WebcamListener {
         labelMotionCount.setLayoutY(610);
         labelMotionCount.setFont(Font.font("Arial", 20));
 
-        Label labelProtanomal = new Label("Protanomal Vision");
+        Label labelProtanomal = new Label("Protanomaly Vision");
         labelProtanomal.setLayoutX(1000);
         labelProtanomal.setLayoutY(500);
         labelProtanomal.setFont(Font.font("Arial", 20));
