@@ -127,6 +127,11 @@ public class Main extends Application implements WebcamListener {
         labelMotionCount.setLayoutY(610);
         labelMotionCount.setFont(Font.font("Arial", 20));
 
+        Label labelProtanomal = new Label("Protanomal Vision");
+        labelProtanomal.setLayoutX(1000);
+        labelProtanomal.setLayoutY(500);
+        labelProtanomal.setFont(Font.font("Arial", 20));
+
         Pane pane = new Pane();
         pane.setPrefSize(1350, 700);
         pane.setStyle("-fx-background-color: #7F7F7F");
@@ -141,6 +146,7 @@ public class Main extends Application implements WebcamListener {
         pane.getChildren().add(sliderThreshold);
         pane.getChildren().add(buttonResetCounter);
         pane.getChildren().add(labelMotionCount);
+        pane.getChildren().add(labelProtanomal);
         Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
