@@ -9,19 +9,19 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.control.Label;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class Main extends Application implements WebcamListener {
     private static final String version = "v20241214";
@@ -34,6 +34,7 @@ public class Main extends Application implements WebcamListener {
     private float threshold = 2.0f;
     private boolean thresholdFlag = false;
     private int motionCount = 0;
+    private Timeline timeline;
 
     public static void main(String[] args)
     {
@@ -132,6 +133,25 @@ public class Main extends Application implements WebcamListener {
         labelProtanomal.setLayoutY(500);
         labelProtanomal.setFont(Font.font("Arial", 20));
 
+        List<Webcam> webcams = Webcam.getWebcams();
+        ComboBox<Webcam> comboBox = new ComboBox<>();
+        comboBox.getItems().addAll(webcams);
+        comboBox.setPromptText("Select Camera");
+        comboBox.setLayoutX(600);
+        comboBox.setLayoutY(500);
+        comboBox.setOnAction(event -> {
+            if (webcam != null && webcam.isOpen()) {
+                webcam.close();
+            }
+            webcam = comboBox.getSelectionModel().getSelectedItem();
+            if (webcam != null) {
+                webcam.setViewSize(WebcamResolution.VGA.getSize());
+                webcam.addWebcamListener(Main.this);
+                webcam.open();
+                updateImageView();
+            }
+        });
+
         Pane pane = new Pane();
         pane.setPrefSize(1350, 700);
         pane.setStyle("-fx-background-color: #7F7F7F");
@@ -147,13 +167,14 @@ public class Main extends Application implements WebcamListener {
         pane.getChildren().add(buttonResetCounter);
         pane.getChildren().add(labelMotionCount);
         pane.getChildren().add(labelProtanomal);
+        pane.getChildren().add(comboBox);
         Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.setTitle("Webcam - " + version);
         primaryStage.show();
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
+        timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> {
             if(showMotionEffect){
                 labelMotion.setText("Motion: " + motion + "%");
             }else {
@@ -169,6 +190,12 @@ public class Main extends Application implements WebcamListener {
     @Override
     public void stop() throws Exception {
         super.stop();
+        if (timeline != null) {
+            timeline.stop();
+        }
+        if (webcam != null && webcam.isOpen()) {
+            webcam.close();
+        }
         System.out.println("Closing Application.");
     }
 
@@ -189,6 +216,11 @@ public class Main extends Application implements WebcamListener {
 
     @Override
     public void webcamImageObtained(WebcamEvent webcamEvent) {
+        imageProcessing();
+    }
+
+    private void imageProcessing()
+    {
         if(showMotionEffect)
         {
             float motionCalculation = 0f;
@@ -238,6 +270,18 @@ public class Main extends Application implements WebcamListener {
         applyManVision(bufferedImageManVision);
         imageManVision = SwingFXUtils.toFXImage(bufferedImageManVision, null);
         imageView2.setImage(imageManVision);
+    }
+
+    private void updateImageView() {
+        if (bufferedImage != null) {
+            bufferedImage.flush(); // Release previous image resources
+        }
+
+        if (bufferedImageManVision != null) {
+            bufferedImageManVision.flush(); // Release previous image resources
+        }
+
+        imageProcessing();
     }
 
     private void setMonochromatic(BufferedImage bufferedImageMono)
